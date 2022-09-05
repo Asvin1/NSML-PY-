@@ -9,9 +9,8 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.constants import *
-
 import test1_support
-
+from ttkwidgets.autocomplete import AutocompleteCombobox
 import MySQLdb
 mydb=MySQLdb.connect(host="localhost",user="root",password="root",port=3306)
 mycursor=mydb.cursor()
@@ -23,39 +22,6 @@ L1,L2,L3,L4,L5=modt.funclist(L1,L2,L3,L4,L5)
 import os.path
 
 
-
-def vp_start_gui():
-    '''Starting point when module is the main routine.'''
-    global val, w, root
-    global prog_location
-    prog_call = sys.argv[0]
-    prog_location = os.path.split(prog_call)[0]
-    root = tk.Tk()
-    test1_support.set_Tk_var()
-    top = Toplevel1 (root)
-    test1_support.init(root, top)
-    root.mainloop()
-
-w = None
-def create_Toplevel1(rt, *args, **kwargs):
-    '''Starting point when module is imported by another module.
-       Correct form of call: 'create_Toplevel1(root, *args, **kwargs)' .'''
-    global w, w_win, root
-    global prog_location
-    prog_call = sys.argv[0]
-    prog_location = os.path.split(prog_call)[0]
-    #rt = root
-    root = rt
-    w = tk.Toplevel (root)
-    test1_support.set_Tk_var()
-    top = Toplevel1 (w)
-    test1_support.init(w, top, *args, **kwargs)
-    return (w, top)
-
-def destroy_Toplevel1():
-    global w
-    w.destroy()
-    w = None
 
 class Toplevel1:
     def __init__(self, top=None):
@@ -96,30 +62,32 @@ class Toplevel1:
         self.Button1.configure(activeforeground="white")
         self.Button1.configure(activeforeground="#000000")
         self.Button1.configure(background="#0080c0")
-        self.Button1.configure(command=test1_support.tbl)
+        self.Button1.configure(command=test1_support.push)
         self.Button1.configure(disabledforeground="#a3a3a3")
         self.Button1.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.Button1.configure(foreground="#000000")
         self.Button1.configure(highlightbackground="#d9d9d9")
         self.Button1.configure(highlightcolor="#ffff00")
-        photo_location = "../Users/Asvin/Desktop/outline_add_circle_white_24dp.png"
+        photo_location = "icons/outline_add_circle_white_24dp.png"
         global _img0
         _img0 = tk.PhotoImage(file=photo_location)
         self.Button1.configure(image=_img0)
         self.Button1.configure(pady="0")
         self.Button1.configure(text='''ADD''')
 
-        self.TCombobox1 = ttk.Combobox(self.top)
+        self.TCombobox1 = AutocompleteCombobox(self.top)
         self.TCombobox1.place(relx=0.133, rely=0.069, relheight=0.042
                 , relwidth=0.125)
         self.value_list = L1
         self.TCombobox1.configure(values=self.value_list)
+        self.TCombobox1.configure(completevalues=self.value_list)
         self.TCombobox1.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.TCombobox1.configure(textvariable=test1_support.combobox1)
         self.combobox.set('''combobox''')
         self.TCombobox1.configure(background="#9e9e9e")
         self.TCombobox1.configure(takefocus="")
         self.TCombobox1.configure(cursor="fleur")
+        self.TCombobox1.bind('<Key-Return>',lambda x=None:self.Entry1.focus_set())
 
         self.Entry1 = tk.Entry(self.top)
         self.Entry1.place(relx=0.289, rely=0.069, height=30, relwidth=0.097)
@@ -133,6 +101,7 @@ class Toplevel1:
         self.Entry1.configure(selectbackground="blue")
         self.Entry1.configure(selectforeground="white")
         self.Entry1.configure(textvariable=test1_support.rcd)
+        self.Entry1.bind('<Key-Return>',lambda x=None:[test1_support.rcd.set(test1_support.dtft(test1_support.rcd.get())),self.Entry2.focus_set()])
 
         self.Entry2 = tk.Entry(self.top)
         self.Entry2.place(relx=0.406, rely=0.069, height=30, relwidth=0.105)
@@ -146,6 +115,7 @@ class Toplevel1:
         self.Entry2.configure(selectbackground="blue")
         self.Entry2.configure(selectforeground="white")
         self.Entry2.configure(textvariable=test1_support.inv_num)
+        self.Entry2.bind('<Key-Return>',lambda x=None:[self.Entry3.focus_set()])
 
         self.Entry3 = tk.Entry(self.top)
         self.Entry3.place(relx=0.531, rely=0.069, height=30, relwidth=0.081)
@@ -159,6 +129,7 @@ class Toplevel1:
         self.Entry3.configure(selectbackground="blue")
         self.Entry3.configure(selectforeground="white")
         self.Entry3.configure(textvariable=test1_support.inv)
+        self.Entry3.bind('<Key-Return>',lambda x=None:[test1_support.inv.set(test1_support.dtft(test1_support.inv.get())),self.Entry4.focus_set(),test1_support.tbl()])
 
         self.Entry4 = tk.Entry(self.top)
         self.Entry4.place(relx=0.625, rely=0.069, height=30, relwidth=0.089)
@@ -172,6 +143,7 @@ class Toplevel1:
         self.Entry4.configure(selectbackground="blue")
         self.Entry4.configure(selectforeground="white")
         self.Entry4.configure(textvariable=test1_support.gr_num)
+        self.Entry4.bind('<Key-Return>',lambda x=None:[self.TCombobox5.focus_set()])
 
         self.Label1 = tk.Label(self.top)
         self.Label1.place(relx=0.594, rely=0.153, height=34, width=99)
@@ -233,40 +205,45 @@ class Toplevel1:
         self.Label5.configure(highlightcolor="black")
         self.Label5.configure(text='''YARN_LOT''')
 
-        self.TCombobox2 = ttk.Combobox(self.top)
+        self.TCombobox2 = AutocompleteCombobox(self.top)#ttk.Combobox(self.top)
         self.TCombobox2.place(relx=0.023, rely=0.208, relheight=0.042
                 , relwidth=0.125)
         self.value_list = L2
         self.TCombobox2.configure(values=self.value_list)
+        self.TCombobox2.configure(completevalues=self.value_list)
         self.TCombobox2.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.TCombobox2.configure(textvariable=test1_support.combobox2)
         self.combobox2.set('''combobox2''')
         self.TCombobox2.configure(background="#9e9e9e")
         self.TCombobox2.configure(takefocus="")
+        self.TCombobox2.bind('<Key-Return>',lambda x=None:[self.TCombobox3.focus_set()])
 
-        self.TCombobox3 = ttk.Combobox(self.top)
+        self.TCombobox3 = AutocompleteCombobox(self.top)
         self.TCombobox3.place(relx=0.164, rely=0.208, relheight=0.042
                 , relwidth=0.125)
         self.value_list = L3
         self.TCombobox3.configure(values=self.value_list)
+        self.TCombobox3.configure(completevalues=self.value_list)
         self.TCombobox3.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.TCombobox3.configure(textvariable=test1_support.combobox3)
         self.combobox3.set('''combobox3''')
         self.TCombobox3.configure(background="#9e9e9e")
         self.TCombobox3.configure(takefocus="")
+        self.TCombobox3.bind('<Key-Return>',lambda x=None:[self.TCombobox4.focus_set()])
 
-        self.TCombobox4 = ttk.Combobox(self.top)
+        self.TCombobox4 = AutocompleteCombobox(self.top)
         self.TCombobox4.place(relx=0.305, rely=0.208, relheight=0.042
                 , relwidth=0.125)
         #self.TCombobox4.configure(postcommand="test1_support.cd")
         self.value_list = L4
         self.TCombobox4.configure(values=self.value_list)
+        self.TCombobox4.configure(completevalues=[str(i) for i in self.value_list])
         self.TCombobox4.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.TCombobox4.configure(textvariable=test1_support.combobox4)
         self.combobox4.set('''combobox4''')
         self.TCombobox4.configure(background="#9e9e9e")
         self.TCombobox4.configure(takefocus="")
-        self.TCombobox4.bind("<Key-Return>",lambda x:[self.Entry1.focus_set(),test1_support.cd(1)])
+        self.TCombobox4.bind("<Key-Return>",lambda x:[self.Entry1.focus_set(),test1_support.cd(1),self.Entry5.focus_set()])
         #self.TCombobox4.bind("<Key-Return>",test1_support.cd)
         #self.TCombobox4.bind("<FocusOut>",test1_support.cd)
 
@@ -333,7 +310,7 @@ class Toplevel1:
         self.Button2.configure(foreground="#000000")
         self.Button2.configure(highlightbackground="#d9d9d9")
         self.Button2.configure(highlightcolor="black")
-        photo_location = "../Users/Asvin/Desktop/outline_refresh_black_18dp.png"
+        photo_location = "icons/outline_refresh_black_18dp.png"
         global _img1
         _img1 = tk.PhotoImage(file=photo_location)
         self.Button2.configure(image=_img1)
@@ -350,12 +327,13 @@ class Toplevel1:
         self.Button3.configure(foreground="#000000")
         self.Button3.configure(highlightbackground="#d9d9d9")
         self.Button3.configure(highlightcolor="black")
-        photo_location = "../Users/Asvin/Desktop/outline_delete_black_24dp.png"
+        photo_location = "icons/outline_delete_black_24dp.png"
         global _img2
         _img2 = tk.PhotoImage(file=photo_location)
         self.Button3.configure(image=_img2)
         self.Button3.configure(pady="0")
         self.Button3.configure(text='''Button''')
+        self.Button3.configure(command=lambda x=None:test1_support.dele())
 
         self.Label5_1 = tk.Label(self.top)
         self.Label5_1.place(relx=0.422, rely=0.014, height=36, width=94)
@@ -430,6 +408,7 @@ class Toplevel1:
         self.Entry5.configure(selectbackground="blue")
         self.Entry5.configure(selectforeground="white")
         self.Entry5.configure(textvariable=test1_support.y_s)
+        self.Entry5.bind('<Key-Return>',lambda x=None:[self.Entry6.focus_set()])
 
         self.Entry6 = tk.Entry(self.top)
         self.Entry6.place(relx=0.578, rely=0.208, height=30, relwidth=0.113)
@@ -443,6 +422,7 @@ class Toplevel1:
         self.Entry6.configure(selectbackground="blue")
         self.Entry6.configure(selectforeground="white")
         self.Entry6.configure(textvariable=test1_support.cd_num)
+        self.Entry6.bind('<Key-Return>',lambda x=None:[self.Entry7.focus_set()])
 
         self.Entry7 = tk.Entry(self.top)
         self.Entry7.place(relx=0.711, rely=0.208, height=30, relwidth=0.073)
@@ -457,6 +437,7 @@ class Toplevel1:
         self.Entry7.configure(selectbackground="blue")
         self.Entry7.configure(selectforeground="white")
         self.Entry7.configure(textvariable=test1_support.n_w)
+        self.Entry7.bind('<Key-Return>',lambda x=None:[self.Entry8.focus_set()])
 
         self.Entry8 = tk.Entry(self.top)
         self.Entry8.place(relx=0.805, rely=0.208, height=30, relwidth=0.097)
@@ -470,15 +451,18 @@ class Toplevel1:
         self.Entry8.configure(selectbackground="blue")
         self.Entry8.configure(selectforeground="white")
         self.Entry8.configure(textvariable=test1_support.inv_pr)
+        self.Entry8.bind('<Key-Return>',lambda x=None:[self.Entry9.focus_set()])
 
-        self.TCombobox5 = ttk.Combobox(self.top)
+        self.TCombobox5 = AutocompleteCombobox(self.top)
         self.TCombobox5.place(relx=0.727, rely=0.069, relheight=0.042
                 , relwidth=0.12)
         self.value_list = L5
         self.TCombobox5.configure(values=self.value_list)
+        self.TCombobox5.configure(completevalues=self.value_list)
         self.TCombobox5.configure(font="-family {Segoe UI} -size 9 -weight bold")
         self.TCombobox5.configure(textvariable=test1_support.combobox5)
         self.TCombobox5.configure(takefocus="")
+        self.TCombobox5.bind('<Key-Return>',lambda x=None:[self.TCombobox2.focus_set()])
 
         self.Button4 = tk.Button(self.top)
         self.Button4.place(relx=0.133, rely=0.278, height=44, width=47)
@@ -490,7 +474,7 @@ class Toplevel1:
         self.Button4.configure(foreground="#000000")
         self.Button4.configure(highlightbackground="#d9d9d9")
         self.Button4.configure(highlightcolor="black")
-        photo_location = "../Users/Asvin/Desktop/outline_edit_calendar_black_36dp.png"
+        photo_location = "icons/outline_edit_calendar_black_36dp.png"
         global _img3
         _img3 = tk.PhotoImage(file=photo_location)
         self.Button4.configure(image=_img3)
@@ -502,12 +486,12 @@ class Toplevel1:
         self.Button5.configure(activebackground="#d9d900")
         self.Button5.configure(activeforeground="#000000")
         self.Button5.configure(background="#ffff00")
-        self.Button5.configure(command=test1_support.calend)
+        self.Button5.configure(command=lambda :[print("*",test1_support.caldate.get())])
         self.Button5.configure(disabledforeground="#a3a3a3")
         self.Button5.configure(foreground="#000000")
         self.Button5.configure(highlightbackground="#d9d9d9")
         self.Button5.configure(highlightcolor="black")
-        photo_location = "../Users/Asvin/Desktop/outline_check_black_36dp.png"
+        photo_location = "icons/outline_check_black_36dp.png"
         global _img4
         _img4 = tk.PhotoImage(file=photo_location)
         self.Button5.configure(image=_img4)
@@ -520,24 +504,73 @@ class Toplevel1:
         self.Button6.configure(activeforeground="white")
         self.Button6.configure(activeforeground="#000000")
         self.Button6.configure(background="#ff8000")
-        self.Button6.configure(command=test1_support.focus)
+        self.Button6.configure(command=test1_support.tbl)
         self.Button6.configure(disabledforeground="#a3a3a3")
         self.Button6.configure(foreground="#000000")
         self.Button6.configure(highlightbackground="#d9d9d9")
         self.Button6.configure(highlightcolor="black")
-        photo_location = "../Users/Asvin/Desktop/outline_star_border_black_24dp.png"
+        photo_location = "icons/outline_star_border_black_24dp.png"
         global _img5
         _img5 = tk.PhotoImage(file=photo_location)
         self.Button6.configure(image=_img5)
         self.Button6.configure(pady="0")
         self.Button6.configure(text='''Button''')
 
-# def start_up():
-#     test1_support.main()
+        self.Label9 = tk.Label(self.top)
+        self.Label9.place(relx=0.911, rely=0.167, height=24, width=93)
+        self.Label9.configure(activebackground="#f9f9f9")
+        self.Label9.configure(activeforeground="black")
+        self.Label9.configure(background="#737373")
+        self.Label9.configure(disabledforeground="#a3a3a3")
+        self.Label9.configure(font="-family {Segoe UI} -size 9 -weight bold")
+        self.Label9.configure(foreground="#ffffff")
+        self.Label9.configure(highlightbackground="#d9d9d9")
+        self.Label9.configure(highlightcolor="black")
+        self.Label9.configure(text='''BAGS''')
+
+        self.Entry9 = tk.Entry(self.top)
+        self.Entry9.place(relx=0.911, rely=0.208, height=30, relwidth=0.073)
+        self.Entry9.configure(background="white")
+        self.Entry9.configure(cursor="fleur")
+        self.Entry9.configure(disabledforeground="#a3a3a3")
+        self.Entry9.configure(font="-family {Courier New} -size 10 -weight bold")
+        self.Entry9.configure(foreground="#000000")
+        self.Entry9.configure(highlightbackground="#d9d9d9")
+        self.Entry9.configure(highlightcolor="black")
+        self.Entry9.configure(insertbackground="black")
+        self.Entry9.configure(selectbackground="blue")
+        self.Entry9.configure(selectforeground="white")
+        self.Entry9.bind('<Key-Return>',lambda x=None:[self.Entry10.focus_set()])
+
+        self.Label10 = tk.Label(self.top)
+        self.Label10.place(relx=0.886, rely=0.027, height=23, width=100)
+        self.Label10.configure(activebackground="#f9f9f9")
+        self.Label10.configure(activeforeground="#c0c0c0")
+        self.Label10.configure(background="#737373")
+        self.Label10.configure(disabledforeground="#a3a3a3")
+        self.Label10.configure(font="-family {Segoe UI} -size 9 -weight bold")
+        self.Label10.configure(foreground="#ffffff")
+        self.Label10.configure(highlightbackground="#d9d9d9")
+        self.Label10.configure(highlightcolor="black")
+        self.Label10.configure(text='''TRANSPORT''')
+
+        self.Entry10 = tk.Entry(self.top)
+        self.Entry10.place(relx=0.870, rely=0.068, height=30, relwidth=0.103)
+        self.Entry10.configure(background="white")
+        self.Entry10.configure(cursor="fleur")
+        self.Entry10.configure(disabledforeground="#a3a3a3")
+        self.Entry10.configure(font="-family {Courier New} -size 10 -weight bold")
+        self.Entry10.configure(foreground="#000000")
+        self.Entry10.configure(highlightbackground="#d9d9d9")
+        self.Entry10.configure(highlightcolor="black")
+        self.Entry10.configure(insertbackground="black")
+        self.Entry10.configure(selectbackground="blue")
+        self.Entry10.configure(selectforeground="white")
+        self.Entry10.bind('<Key-Return>',lambda x=None:[test1_support.tbl(),test1_support.push()])
+
+
+def start_up():
+    test1_support.main()
 
 if __name__ == '__main__':
-    vp_start_gui()
-
-
-
-
+    test1_support.main()
