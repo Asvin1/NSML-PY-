@@ -6,7 +6,10 @@
 #    Feb 25, 2022 10:05:33 PM IST  platform: Windows NT
 #    Feb 25, 2022 10:07:23 PM IST  platform: Windows NT
 st=None
+ptext=""
 import sys
+from datetime import date
+from datetime import *
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.constants import *
@@ -17,7 +20,9 @@ import MySQLdb
 mydb=MySQLdb.connect(host="localhost",user="root",password="root",port=3306)
 mycursor=mydb.cursor()
 mycursor.execute("use `yarn register`")
-x=None
+import re
+import tkinter.messagebox
+
 class popup:
     def __init__(self, top=None):
         '''This class configures and populates the toplevel window.
@@ -41,18 +46,18 @@ class popup:
         self.Label1.configure(disabledforeground="#a3a3a3")
         self.Label1.configure(font="-family {Segoe UI} -size 13 -weight bold")
         self.Label1.configure(foreground="#ffff00")
-        self.Label1.configure(text='''Wrong Shade Number''')
+        self.Label1.configure(text=str(ptext))#'''Wrong Shade Number'''
+        #self.Label1.configure(textvariable=ptext)
 
 def focus():
     print(str(root.focus_get()))
-cal=None
 def dty(a):
-    global x
-    global cal
-    x.destroy()
-    x=None
-    del cal
-    del x
+    global w2
+    global top2
+    top2.destroy()
+    #x=None
+    #del cal
+    #del x
     if st=="rcd":
         print("RCD")
         rcd.set(caldate.get())
@@ -76,7 +81,8 @@ class cald:
         top.title("Select Date")
         top.configure(background="#404040")
 
-        self.cal=Calendar(top,selectmode="day",textvariable=caldate)
+        caldate.set(date.today().strftime('%d-%m-%Y'))
+        self.cal=Calendar(top,date_pattern='dd-MM-yyyy',selectmode="day",textvariable=caldate)
         self.cal.place(relx=0.03, rely=0.03, height=300, width=300)
         self.top = top
 
@@ -95,34 +101,29 @@ class cald:
         self.Button1.configure(pady="0")
         self.Button1.configure(text='''OK''')
 
-
-
-def init(top, gui, *args, **kwargs):
-    global w, top_level, root
-    w = gui
-    top_level = top
-    root = top
-
 def set_Tk_var():
     print("VAR")
     global msgv
     msgv = tk.StringVar()
     msgv.set('Message')
 
+    global ptext
+    #ptext=tk.StringVar()
     global cd_num
     cd_num = tk.StringVar()
-    global combobox1
+    global combobox1 #BUYER
     combobox1 = tk.StringVar()
-    global combobox2
+    global combobox2 #YARN COUNT
     combobox2 = tk.StringVar()
-    global combobox3
+    global combobox3 #YARN
     combobox3 = tk.StringVar()
-    global combobox4
+    global combobox4    #SHADE NO.
     combobox4 = tk.StringVar()
-    global combobox5
+    global combobox5 #YARN SUPPLIER
     combobox5 = tk.StringVar()
     global caldate
     caldate = tk.StringVar()
+    caldate.set(date.today().strftime('%d-%m-%Y'))
     global rcd
     rcd = tk.StringVar()
     global inv
@@ -138,15 +139,20 @@ def set_Tk_var():
     global inv_pr
     inv_pr = tk.StringVar()
     #caldate.trace('w',getdate())
+    #caldate.trace_add('write', (lambda x,y,z:print(caldate.get())))
 def main(*args):
     '''Main entry point for the application.'''
     global root
     root = tk.Tk()
     root.protocol( 'WM_DELETE_WINDOW' , root.destroy)
+    root.iconbitmap('icons\inventory_FILL1_wght400_GRAD0_opsz48.ico')
+    set_Tk_var()
     # Creates a toplevel widget.
-    global _top44, _w44
-    _top44 = root
-    _w44 = test1.Toplevel1(_top44)
+    global top44, w44
+    top44 = root
+    w44 = test1.Toplevel1(top44)
+    w44.cust1.set_all_column_widths(width = None, only_set_if_too_small = False, redraw = True, recreate_selection_boxes = True)
+    w44.TCombobox1.focus_set()
     root.mainloop()
 
 class sheet(Sheet):
@@ -157,15 +163,16 @@ class sheet(Sheet):
             theme="dark blue",
             horizontal_grid_to_end_of_window = True,
             vertical_grid_to_end_of_window = True,
-            data =[]
+            data =[['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17'],],
+            headers=["ID", "RCD_DATE", "BUYER", "INVOICE_NUM", "INVOICE_DT", "GR_NUM", "YARN SUPPLIER", "YARN COUNT", "YARN SHADES", "SHADE_NUM", "YARN LOT", "STK_CRD_NUM", "NET_WT", "BAGS", "Transporter", "INVOICE_PRICE", "DYEING_CHG", "DYEING_WSTG"]
             )
 Custom=sheet
 
+
 def calend(*args):
+        global w2
         global st
-        global cal
-        global x
-        cal=None
+        global top2
         print('test1_support.calend')
         if (str((root.focus_get()))[2:])=="entry":
             st="rcd"
@@ -173,14 +180,17 @@ def calend(*args):
         elif (str((root.focus_get()))[2:])=="entry3":
             st="inv"
             print("FI")
-        x=tk.Tk()
-        cal=cald(x)
-        x.mainloop()
-        cal=None
-
+        #x=tk.Tk()
+        #x.protocol( 'WM_DELETE_WINDOW' ,x.destroy)
+        caldate.set(date.today().strftime('%d-%m-%Y'))
+        top2=tk.Toplevel(root)
+        w2=cald(top2)
+        #x.mainloop()
+        #cal=None
 def cd(a):
     print('test1_support.cd')
     global L4
+    global ptext
     print(combobox4.get())
     mycursor.execute("select card_num,shade_num from yarn_cardnum_shdnum_tbl")
     Lt=tuple([i[1] for i in mycursor.fetchall()])
@@ -190,36 +200,106 @@ def cd(a):
         i=Lt.index(eval(combobox4.get()))
         cd_num.set(int(Lr[i]))
     except:
-        print("galat shade number dala hn bhai")
-        x=tk.Tk()
-        pop=popup(x)
+        print("SHADEx")
+        tkinter.messagebox.showinfo("ATTENTION!",  "WRONG SHADE NUMBER")
     sys.stdout.flush()
 
 def destroy_window():
     # Function which closes the window.
-    global top_level
-    top_level.destroy()
-    top_level = None
+    global top44
+    top44.destroy()
+    #top_level = None
 
 def rfsh():
     print('test1_support.rfsh')
     destroy_window()
-    import test1
-    test1.vp_start_gui()
-    sys.stdout.flush()
-data=[]
-def tbl(*args):
     global data
-    data.append([cd_num.get(),combobox1.get(),combobox2.get(),combobox3.get(),combobox4.get(),combobox5.get(),caldate.get(),rcd.get(),inv.get(),inv_num.get(),gr_num.get(),y_s.get(),n_w.get(),inv_pr.get()])
-    print('test1_support.tbl')
-    w.cust1.set_sheet_data(data)
+    data=[[],]
+    #caldate.set("")
+    import test1
+    test1.start_up()
     sys.stdout.flush()
+    w44.cust1.set_sheet_data(data)
+data=[]
+# def tbl(*args):
+#     global data
+#     global ptext
+#     if(str(cd_num.get())=="" or str(combobox1.get())=="" or str(combobox2.get())=="" or str(combobox3.get())=="" or str(combobox4.get())=="" or str(combobox5.get())=="" or str(rcd.get())=="" or str(inv.get())=="" or str(inv_num.get())=="" or str(n_w.get())=="" ):
+#         x=tk.Tk()
+#         ptext="FIELD LEFT BLANK"
+#         x.protocol( 'WM_DELETE_WINDOW' ,x.destroy)
+#         pop=popup(x)
+#         x.mainloop()
+#     else:
+#         data.append([cd_num.get(),combobox1.get(),combobox2.get(),combobox3.get(),combobox4.get(),combobox5.get(),rcd.get(),inv.get(),inv_num.get(),gr_num.get(),y_s.get(),n_w.get(),inv_pr.get()])
+#     print('test1_support.tbl')
+#     w44.cust1.set_sheet_data(data)
+#     sys.stdout.flush()
+
+def dtft(val):
+    if re.search("^\d{1,2}-{1}\d{1,2}$",val)!=None:
+        print("E");    x=datetime.strptime(val, "%d-%m")
+        x=x.replace(year=((date.today()).year))
+        if x>datetime.today():#datetime.strptime(w1.lc_ed.get(), "%d-%m-%Y")
+            tkinter.messagebox.showinfo("ATTENTION!",  "DATE SHOULD NOT BE GREATER THAN END DATE")
+        else:
+            return (x.strftime("%d-%m-%Y"))
+    else:
+        return val
+
+def tbl():
+    global data
+    try:
+        mycursor.execute("SELECT * FROM yarnregister.`yarn received register` WHERE INVOICE_DT='"+(datetime.strptime(inv.get(), "%d-%m-%Y")).strftime("%Y-%m-%d")+"' ORDER BY ID DESC")
+    except:
+        tkinter.messagebox.showinfo("ATTENTION!",  "WRONG DATE")
+    data=mycursor.fetchall()
+    print('test1_support.tbl')
+    w44.cust1.set_sheet_data(data)
+    w44.cust1.set_all_column_widths(width = None, only_set_if_too_small = False, redraw = True, recreate_selection_boxes = True)
+
+def push():
+    if(str(cd_num.get())=="" or str(combobox1.get())=="" or str(combobox2.get())=="" or str(combobox3.get())=="" or str(combobox4.get())=="" or str(combobox5.get())=="" or str(rcd.get())=="" or str(inv.get())=="" or str(inv_num.get())=="" or str(n_w.get())=="" ):
+        tkinter.messagebox.showinfo("ATTENTION!",  "DATA MISSING")
+    else:
+        try:
+            mycursor.execute("INSERT INTO `yarnregister`.`yarn received register` (`RCD_DATE`, `BUYER`, `INVOICE_NUM`, `INVOICE_DT`, `GR_NUM`, `YARN SUPPLIER`, `YARN COUNT`, `YARN SHADES`, `SHADE_NUM`, `YARN LOT`, `STK_CRD_NUM`, `NET_WT`, `BAGS`, `Transporter`, `INVOICE_PRICE`, `DYEING_CHG`, `DYEING_WSTG`) \
+                VALUES ('"+(datetime.strptime(rcd.get(), "%d-%m-%Y")).strftime("%Y-%m-%d")+"', '"+combobox1.get()+"', '"+inv_num.get()+"', '"+(datetime.strptime(inv.get(), "%d-%m-%Y")).strftime("%Y-%m-%d")+"', '"+gr_num.get()+"', '"+combobox5.get()+"', '"+combobox2.get()+"', '"+combobox3.get()+"', "+combobox4.get()+",' "+y_s.get()+"', "+cd_num.get()+", "+n_w.get()+", "+w44.Entry9.get()+", '"+w44.Entry10.get()+"', "+(inv_pr.get() if inv_pr.get()!="" else "default")+", 0, 0);")
+            mydb.commit()
+        except:
+            tkinter.messagebox.showinfo("ATTENTION!",  "DATA FORMAT WRONG")
+        tbl()
+    cd_num.set("")
+    combobox1.set("")
+    combobox2.set("")
+    combobox3.set("")
+    combobox4.set("")
+    combobox5.set("")
+    rcd.set("")
+    inv.set("")
+    inv_num.set("")
+    gr_num.set("")
+    y_s.set("")
+    n_w.set("")
+    inv_pr.set("")
+    w44.TCombobox1.focus_set()
+
+def dele():
+    Y=tkinter.messagebox.askyesno("CONFIRM","ARE YOU SURE?")
+    if Y:
+        print(w44.cust1.get_cell_data(int((w44.cust1.get_currently_selected())[0]),int((w44.cust1.get_currently_selected())[1])))
+        for i in data:
+            if(i[0]==int(w44.cust1.get_cell_data(int((w44.cust1.get_currently_selected())[0]),int((w44.cust1.get_currently_selected())[1])))):
+                mycursor.execute("DELETE FROM `yarnregister`.`yarn received register` WHERE (`ID` = "+str(i[0])+")")
+                mydb.commit()
+                print("DELETED")
+                try:
+                    tbl()
+                except:
+                    inv.set(data[0][4])
+                    tbl()
+                break
 
 if __name__ == '__main__':
     import test1
-    test1.vp_start_gui()
-
-
-
-
-
+    test1.start_up()
